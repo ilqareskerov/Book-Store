@@ -1,0 +1,51 @@
+version: "3.8"
+services:
+    bookstore:
+        image: ilqar/bookstore:latest
+        ports:
+        - 8080:8080
+        depends_on:
+        - db
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 30s
+                max_attempts: 3
+                window: 120s
+        environment:
+          SPRING_APPLICATION_NAME: bookstore
+          SPRING_PROFILES_ACTIVE: default
+          SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/bookstore?useSSL=false&serverTimezone=UTC
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
+        networks:
+          - bridge
+    db:
+      image: mysql:8.0
+      cap_add:
+        - SYS_NICE
+      restart: always
+      environment:
+        - MYSQL_DATABASE=bookstore
+        - MYSQL_ROOT_PASSWORD=root
+      ports:
+        - '3307:3306'
+      networks:
+        - bridge
+
+    jwt_security:
+      image: mysql:8.0
+      cap_add:
+        - SYS_NICE
+      restart: always
+      environment:
+        - MYSQL_DATABASE=jwt_security
+        - MYSQL_ROOT_PASSWORD=root
+      ports:
+        - '3308:3306'
+      networks:
+        - bridge
+
+networks:
+  bridge:
+    driver: bridge
